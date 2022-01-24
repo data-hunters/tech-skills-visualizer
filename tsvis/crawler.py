@@ -42,6 +42,7 @@ class StackOverflowCrawler:
         chunked_user_ids = chunk(user_ids, 100)
         tags = []
         for u_ids_chunk in chunked_user_ids:
+            u_ids_chunk = [str(id) for id in u_ids_chunk]
             users_tags = self.site.fetch(f'{self.USERS_ENDPOINT}/{";".join(u_ids_chunk)}/{self.TAGS_ENDPOINT}', sort=sort_field, order=order)
             users_tags = [{'name': t['name'], 'count': t['count'], 'user_id': t['user_id'], 'user_name': users_map[t['user_id']]} for t in users_tags['items']]
             tags.extend(users_tags)
