@@ -21,27 +21,19 @@ def build_node_colors(technologies, users, tech_color=0xFF000000, user_color=0x0
     return node_colors
 
 
-def build_node_ids(base_nodes, id_field='id'):
-    return [str(n[id_field]) for n in base_nodes]
-
-
-def build_node_labels(base_nodes, label_field='label'):
-    return [n[label_field] for n in base_nodes]
-
-
-def build_final_nodes(node_ids, node_labels, node_colors):
+def build_final_nodes(nodes, node_colors, id_field='id', label_field='label'):
     return pd.DataFrame.from_dict({
-        'id': node_ids,
-        'label': node_labels,
+        'id': [str(n[id_field]) for n in nodes],
+        'label': [n[label_field] for n in nodes],
         'color': node_colors
     })
 
 
-def build_final_edges(edges):
+def build_final_edges(edges, edges_id_field='name', user_id_field='user_id', tags_count_field='count'):
     return pd.DataFrame.from_dict({
-        'technology_id': [e['name'] for e in edges],
-        'user_id': [str(e['user_id']) for e in edges],
-        'tags_count': [e['count'] for e in edges]
+        'tag_id': [e[edges_id_field] for e in edges],
+        'user_id': [str(e[user_id_field]) for e in edges],
+        'tags_count': [e[tags_count_field] for e in edges]
     })
 
 
@@ -49,8 +41,6 @@ def build_graph(edges, tech_color=0xFF000000, user_color=0x0000FF00):
     technologies, users = preprocess_nodes(edges)
     nodes = build_base_nodes(technologies, users)
     node_colors = build_node_colors(technologies, users, tech_color, user_color)
-    node_ids = build_node_ids(nodes)
-    node_labels = build_node_labels(nodes)
-    nodes_df = build_final_nodes(node_ids, node_labels, node_colors)
+    nodes_df = build_final_nodes(nodes, node_colors)
     edges_df = build_final_edges(edges)
     return nodes_df, edges_df

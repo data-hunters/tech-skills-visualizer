@@ -9,8 +9,8 @@ class StackOverflowCrawler:
     USERS_ENDPOINT = 'users'
     TAGS_ENDPOINT = 'tags'
 
-    def __init__(self, api='stackoverflow'):
-        self.site = StackAPI(api)
+    def __init__(self, max_pages=100, api='stackoverflow'):
+        self.client = StackAPI(api, max_pages=max_pages)
 
     def crawl_user_tag_relations(self, tags, sort_field='votes', order='desc'):
         """
@@ -23,14 +23,20 @@ class StackOverflowCrawler:
         https://api.stackexchange.com/docs/tags-on-users#order=desc&sort=popular&ids=3324741%3B3324743&filter=default&site=stackoverflow&run=true
         """
 
-        questions = self.site.fetch(self.QUESTIONS_ENDPOINT, tagged=tags, sort='votes', order='desc')
+        print('Crawling questions...')
+        questions = self.client.fetch(self.QUESTIONS_ENDPOINT, tagged=tags, sort=sort_field, order=order)
         question_ids = [str(q['question_id']) for q in questions['items']]
         chunked_question_ids = chunk(question_ids, 100)
         all_users = []
         users_map = {}
+        print('Crawling answers...')
         for q_ids_chunk in chunked_question_ids:
-            answers = self.site.fetch(f'{self.QUESTIONS_ENDPOINT}/{";".join(q_ids_chunk)}/{self.ANSWERS_ENDPOINT}', sort=sort_field, order=order)
-            user_ids = [{'id': a['owner']['user_id'], 'name': a['owner']['display_name']} for a in answers['items'] if a['owner']['user_type'] != self.U_NOT_EXIST]
+            answers = self.client.fetch(f'{self.QUESTIONS_ENDPOINT}/{";".join(q_ids_chunk)}/{self.ANSWERS_ENDPOINT}',
+                                        sort=sort_field, order=order)
+        user_ids = []
+        for a in answers['items']:
+            if a['owner']['user_type'] != self.U_NOT_EXIST:
+                user_ids.append({'id': a['owner']['user_id'], 'name': a['owner']['display_name']})
             all_users = all_users + user_ids
             for u in user_ids:
                 users_map[u['id']] = u['name']
@@ -39,12 +45,17 @@ class StackOverflowCrawler:
 
     def crawl_user_tags(self, user_ids, users_map, sort_field='popular', order='desc'):
         """ Crawl user tags based on provided list of user's IDs """
+        user_ids = [str(id) for id in user_ids]
         chunked_user_ids = chunk(user_ids, 100)
+
         tags = []
+        print('Crawling users...')
         for u_ids_chunk in chunked_user_ids:
-            u_ids_chunk = [str(id) for id in u_ids_chunk]
-            users_tags = self.site.fetch(f'{self.USERS_ENDPOINT}/{";".join(u_ids_chunk)}/{self.TAGS_ENDPOINT}', sort=sort_field, order=order)
-            users_tags = [{'name': t['name'], 'count': t['count'], 'user_id': t['user_id'], 'user_name': users_map[t['user_id']]} for t in users_tags['items']]
+            fetched_users_tags = self.client.fetch(f'{self.USERS_ENDPOINT}/{";".join(u_ids_chunk)}/{self.TAGS_ENDPOINT}', sort=sort_field, order=order)
+            users_tags = []
+            for t in fetched_users_tags['items']:
+                users_tags.append({'name': t['name'], 'count': t['count'], 'user_id': t['user_id'],
+                                   'user_name': users_map[t['user_id']]})
             tags.extend(users_tags)
         return tags
 
