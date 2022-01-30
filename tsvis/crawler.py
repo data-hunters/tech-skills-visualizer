@@ -33,13 +33,12 @@ class StackOverflowCrawler:
         for q_ids_chunk in chunked_question_ids:
             answers = self.client.fetch(f'{self.QUESTIONS_ENDPOINT}/{";".join(q_ids_chunk)}/{self.ANSWERS_ENDPOINT}',
                                         sort=sort_field, order=order)
-        user_ids = []
-        for a in answers['items']:
-            if a['owner']['user_type'] != self.U_NOT_EXIST:
-                user_ids.append({'id': a['owner']['user_id'], 'name': a['owner']['display_name']})
+            user_ids = []
+            for a in answers['items']:
+                if a['owner']['user_type'] != self.U_NOT_EXIST:
+                    user_ids.append({'id': a['owner']['user_id'], 'name': a['owner']['display_name']})
+                    users_map[u['id']] = u['name']
             all_users = all_users + user_ids
-            for u in user_ids:
-                users_map[u['id']] = u['name']
         all_users = [u['id'] for u in get_unique_elements(all_users)]
         return self.crawl_user_tags(all_users, users_map)
 
