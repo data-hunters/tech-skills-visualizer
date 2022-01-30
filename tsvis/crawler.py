@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from stackapi import StackAPI
 from tsvis.util import chunk, get_unique_elements
 
@@ -9,10 +11,12 @@ class StackOverflowCrawler:
     USERS_ENDPOINT = 'users'
     TAGS_ENDPOINT = 'tags'
 
-    def __init__(self, max_pages=100, api='stackoverflow'):
+    def __init__(self, max_pages: int = 100, api: str = 'stackoverflow'):
         self.client = StackAPI(api, max_pages=max_pages)
 
-    def crawl_user_tag_relations(self, tags, sort_field='votes', order='desc'):
+    def crawl_user_tag_relations(self, tags: List[str],
+                                 sort_field: str = 'votes',
+                                 order: str = 'desc') -> List[Dict]:
         """
         Tags will be joined by AND operator, not OR
         Crawling questions by tag:
@@ -36,13 +40,18 @@ class StackOverflowCrawler:
             user_ids = []
             for a in answers['items']:
                 if a['owner']['user_type'] != self.U_NOT_EXIST:
-                    user_ids.append({'id': a['owner']['user_id'], 'name': a['owner']['display_name']})
-                    users_map[u['id']] = u['name']
+                    uid = a['owner']['user_id']
+                    uname = a['owner']['display_name']
+                    user_ids.append({'id': uid, 'name': uname})
+                    users_map[uid] = uname
             all_users = all_users + user_ids
         all_users = [u['id'] for u in get_unique_elements(all_users)]
         return self.crawl_user_tags(all_users, users_map)
 
-    def crawl_user_tags(self, user_ids, users_map, sort_field='popular', order='desc'):
+    def crawl_user_tags(self, user_ids: List[int],
+                        users_map: dict,
+                        sort_field: str = 'popular',
+                        order: str = 'desc') -> List[Dict]:
         """ Crawl user tags based on provided list of user's IDs """
         user_ids = [str(id) for id in user_ids]
         chunked_user_ids = chunk(user_ids, 100)
@@ -51,10 +60,8 @@ class StackOverflowCrawler:
         print('Crawling users...')
         for u_ids_chunk in chunked_user_ids:
             fetched_users_tags = self.client.fetch(f'{self.USERS_ENDPOINT}/{";".join(u_ids_chunk)}/{self.TAGS_ENDPOINT}', sort=sort_field, order=order)
-            users_tags = []
             for t in fetched_users_tags['items']:
-                users_tags.append({'name': t['name'], 'count': t['count'], 'user_id': t['user_id'],
-                                   'user_name': users_map[t['user_id']]})
-            tags.extend(users_tags)
+                tags.append({'name': t['name'], 'count': t['count'], 'user_id': t['user_id'],
+                            'user_name': users_map[t['user_id']]})
         return tags
 

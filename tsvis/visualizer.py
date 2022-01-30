@@ -1,19 +1,22 @@
+from typing import Tuple
+
 import graphistry
 import pyarrow as pa
+from pandas import DataFrame
 
 
 class GraphistryVisualizer:
     """ Helper class for ploting network graps in Graphistry """
 
-    def __init__(self, user, password, protocol='https', server='hub.graphistry.com',
-                 edge_opacity=0.4, edge_size=25, max_poi=100):
+    def __init__(self, user: str, password: str, protocol: str = 'https', server: str = 'hub.graphistry.com',
+                 edge_opacity: float = 0.4, edge_size: int = 25, max_poi: int = 100) -> None:
         self.edge_opacity = edge_opacity
         self.edge_size = edge_size
         self.max_poi = max_poi
         self._register_graphistry(user, password, protocol, server)
 
     @staticmethod
-    def _register_graphistry(user, password, protocol, server):
+    def _register_graphistry(user: str, password: str, protocol: str, server: str) -> None:
         graphistry.register(api=3,
                             protocol=protocol,
                             server=server,
@@ -21,7 +24,7 @@ class GraphistryVisualizer:
                             password=password)
 
     @staticmethod
-    def _convert_to_arrow(edges_df, nodes_df):
+    def _convert_to_arrow(edges_df: DataFrame, nodes_df: DataFrame) -> Tuple:
         """ Convert edges and nodes of the graph from Pandas DataFrames to Arrow format """
         edges_arr = pa.Table.from_pandas(edges_df)
         nodes_arr = pa.Table.from_pandas(nodes_df)
@@ -32,8 +35,8 @@ class GraphistryVisualizer:
         print(nodes_arr.schema)
         return edges_arr, nodes_arr
 
-    def plot(self, edges_df, nodes_df, source_col, dest_col,
-                        node_id_col, edge_weight_col, node_color_col, node_label_col):
+    def plot(self, edges_df: DataFrame, nodes_df: DataFrame, source_col: str, dest_col: str,
+                        node_id_col: str, edge_weight_col: str, node_color_col: str, node_label_col: str) -> str:
         """ Draw graph and returns URL to Graphistry view"""
         edges_arr, nodes_arr = self._convert_to_arrow(edges_df, nodes_df)
         url = graphistry.edges(edges_arr, source_col, dest_col) \
@@ -50,3 +53,4 @@ class GraphistryVisualizer:
                 'pointsOfInterestMax': self.max_poi
             }).plot(render=False)
         print(url)
+        return url
