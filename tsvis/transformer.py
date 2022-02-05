@@ -21,8 +21,8 @@ def build_base_nodes(technologies: List[Dict], users: List[Dict]) -> List[Dict]:
 
 def build_node_colors(technologies: List[Dict], users: List[Dict],
                       tech_color: int = 0xFF000000, user_color: int = 0x0000FF00) -> List[int]:
-    node_colors = [tech_color for i in range(0, len(technologies))]
-    node_colors += [user_color for i in range(0, len(users))]
+    node_colors = [tech_color] * len(technologies)
+    node_colors += [user_color] * len(users)
     return node_colors
 
 
