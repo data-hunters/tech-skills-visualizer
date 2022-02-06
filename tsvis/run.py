@@ -38,7 +38,7 @@ class ArgsHandler:
                      'If you are getting message like "too many requests [...]", decrease this value.'
 
     def __init__(self):
-        parser = argparse.ArgumentParser(prog='TSVis', description=textwrap.dedent(self.DESC), add_help=True,
+        parser = argparse.ArgumentParser(description=textwrap.dedent(self.DESC), add_help=True,
                                          formatter_class=argparse.RawTextHelpFormatter)
         parser.add_argument('-t', '--tags', metavar='tags', type=str, help=self.TAGS_DESC)
         parser.add_argument('-p', '--max-pages', metavar='max_pages', type=int, help=textwrap.dedent(self.MAX_PAGES_DESC), default=10)
