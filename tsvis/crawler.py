@@ -1,5 +1,4 @@
 from typing import Dict, List
-
 from stackapi import StackAPI
 from tsvis.util import chunk, get_unique_elements
 
@@ -11,8 +10,8 @@ class StackOverflowCrawler:
     USERS_ENDPOINT = 'users'
     TAGS_ENDPOINT = 'tags'
 
-    def __init__(self, max_pages: int = 100, api: str = 'stackoverflow'):
-        self.client = StackAPI(api, max_pages=max_pages)
+    def __init__(self, key=None, max_pages: int = 100, api: str = 'stackoverflow'):
+        self.client = StackAPI(api, max_pages=max_pages, key=key)
 
     def crawl_user_tag_relations(self, tags: List[str],
                                  sort_field: str = 'votes',
@@ -59,9 +58,9 @@ class StackOverflowCrawler:
         tags = []
         print('Crawling users...')
         for u_ids_chunk in chunked_user_ids:
-            fetched_users_tags = self.client.fetch(f'{self.USERS_ENDPOINT}/{";".join(u_ids_chunk)}/{self.TAGS_ENDPOINT}', sort=sort_field, order=order)
+            fetched_users_tags = self.client.fetch(
+                f'{self.USERS_ENDPOINT}/{";".join(u_ids_chunk)}/{self.TAGS_ENDPOINT}', sort=sort_field, order=order)
             for t in fetched_users_tags['items']:
                 tags.append({'name': t['name'], 'count': t['count'], 'user_id': t['user_id'],
-                            'user_name': users_map[t['user_id']]})
+                             'user_name': users_map[t['user_id']]})
         return tags
-
