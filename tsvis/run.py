@@ -24,7 +24,7 @@ class ArgsHandler:
     STACK_API_KEY_K = 'STACK_API_KEY'
     NAME = 'TSVis'
     DESC = f'''
-    TSVis - crawling StackOverflow posts and drawing user -> tag relations on Graph.
+    TSVis - crawling StackOverflow posts and drawing user -> tag relations on graph.
     
     In addition to arguments, you also need to provide environment variables:
     {GRAPHISTRY_USER_K} - username of Graphistry account.
