@@ -21,8 +21,12 @@ pip3 install -r requirements.txt
 ```
 
 ### Launching
+It's just an example of running the script but it's better idea to put environment variables (especially `GRAPHISTRY_PASSWD`) to file and load it.
 ```
 export PYTHONPATH="${PYTHONPATH}:."
+export GRAPHISTRY_USER=<GRAPHISTRY_USER>
+export GRAPHISTRY_PASSWD=<GRAPHISTRY_PASSWORD> 
+# OPTIONAL: export STACK_API_KEY=<STACKEXCHANGE_API_KEY>
 python3 tsvis/run.py --tags=bigdata --max-pages=10
 ```
 Run `python3 tsvis/run.py --help` to check other options.
