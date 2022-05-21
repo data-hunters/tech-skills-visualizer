@@ -1,4 +1,6 @@
 # TSVis
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/data-hunters/tech-skills-visualizer/HEAD)
+
 Script uses data from StackOverflow to show relations between users and tags. Main dependencies:
 
 * [stackapi](https://github.com/AWegnerGitHub/stackapi) - crawling data
